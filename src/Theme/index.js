@@ -34,7 +34,7 @@ const theme = (darkMode, color) => ({
   white: '#FFFFFF',
 
   // backgrounds / greys
-  bg1: darkMode ? '#212429' : '#FAFAFA',
+  bg1: darkMode ? '#1e1e2a' : '#FAFAFA',
   bg2: darkMode ? '#2C2F36' : '#F7F8FA',
   bg3: darkMode ? '#40444F' : '#EDEEF2',
   bg4: darkMode ? '#565A69' : '#CED0D9',
@@ -44,7 +44,7 @@ const theme = (darkMode, color) => ({
   //specialty colors
   modalBG: darkMode ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.6)',
   advancedBG: darkMode ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.4)',
-  onlyLight: darkMode ? '#22242a' : 'transparent',
+  onlyLight: darkMode ? '#1e1e2a' : 'transparent',
   divider: darkMode ? 'rgba(43, 43, 43, 0.435)' : 'rgba(43, 43, 43, 0.035)',
 
   //primary colors
@@ -155,8 +155,8 @@ export const ThemedBackground = styled.div`
 `
 
 export const GlobalStyle = createGlobalStyle`
-  @import url('https://rsms.me/inter/inter.css');
-  html { font-family: 'Inter', sans-serif; }
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap');
+  html { font-family: 'Roboto', sans-serif; }
   @supports (font-variation-settings: normal) {
     html { font-family: 'Inter var', sans-serif; }
   }
