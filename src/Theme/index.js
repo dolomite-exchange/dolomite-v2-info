@@ -20,7 +20,7 @@ const theme = (darkMode, color) => ({
   uniswapPink: darkMode ? '#ff007a' : 'black',
 
   concreteGray: darkMode ? '#292C2F' : '#FAFAFA',
-  inputBackground: darkMode ? '#1F1F1F' : '#FAFAFA',
+  inputBackground: darkMode ? '#1e1c29' : '#FAFAFA',
   shadowColor: darkMode ? '#000' : '#2F80ED',
   mercuryGray: darkMode ? '#333333' : '#E1E1E1',
 
@@ -39,7 +39,7 @@ const theme = (darkMode, color) => ({
   bg3: darkMode ? '#40444F' : '#EDEEF2',
   bg4: darkMode ? '#565A69' : '#CED0D9',
   bg5: darkMode ? '#565A69' : '#888D9B',
-  bg6: darkMode ? '#000' : '#FFFFFF',
+  bg6: darkMode ? '#2f2f40' : '#FFFFFF',
 
   //specialty colors
   modalBG: darkMode ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.6)',
@@ -168,7 +168,7 @@ export const GlobalStyle = createGlobalStyle`
     width: 100%;
     height: 100%;
     font-size: 14px;    
-    background-color: ${({ theme }) => theme.bg6};
+    background-color: ${({ theme }) => theme.bg1};
   }
 
   a {
