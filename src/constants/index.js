@@ -1,3 +1,21 @@
+import JSBI from 'jsbi'
+import { Fraction } from '@dolomite-exchange/sdk-core'
+
+const ChainId = {
+  MAINNET: 1,
+  ROPSTEN: 3,
+  RINKEBY: 4,
+  GÖRLI: 5,
+  KOVAN: 42,
+  MATIC: 137,
+  MUMBAI: 80001,
+  ARBITRUM: -1,
+}
+export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+export { ChainId }
+export const NetworkContextName = 'NETWORK'
+
 export const FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
 
 export const BUNDLE_ID = '1'
@@ -62,3 +80,7 @@ export const TRACKED_OVERRIDES = [
   '0xcd7989894bc033581532d2cd88da5db0a4b12859',
   '0xe1573b9d29e2183b1af0e743dc2754979a40d237',
 ]
+
+export const ONE_ETH_IN_WEI = JSBI.BigInt('1000000000000000000')
+export const ONE_MINUTE = 60000
+export const DEFAULT_MIN_COLLATERALIZATION = new Fraction('115', '100')

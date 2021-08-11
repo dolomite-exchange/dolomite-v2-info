@@ -13,10 +13,12 @@ import Search from '../components/Search'
 import GlobalStats from '../components/GlobalStats'
 
 import { useGlobalData, useGlobalTransactions } from '../contexts/GlobalData'
-import { useAllPairData } from '../contexts/PairData'
+// import { useAllPairData } from '../contexts/PairData'
+import { useLast24HourPairData } from '../types/ammPairHourData'
 import { useMedia } from 'react-use'
 import Panel from '../components/Panel'
-import { useAllTokenData } from '../contexts/TokenData'
+// import { useAllTokenData } from '../contexts/TokenData'
+import { useTokenDayDataData } from '../types/tokenDayData'
 import { formattedNum, formattedPercent } from '../utils'
 import { TYPE } from '../Theme'
 import { CustomLink } from '../components/Link'
@@ -24,6 +26,9 @@ import { CustomLink } from '../components/Link'
 import { PageWrapper, ContentWrapper } from '../components'
 import CheckBox from '../components/Checkbox'
 import QuestionHelper from '../components/QuestionHelper'
+
+import { useDolomiteDayDataData } from '../types/dolomiteDayData'
+import { ONE_MINUTE } from '../constants'
 
 const ListOptions = styled(AutoRow)`
   height: 40px;
@@ -47,9 +52,10 @@ const GridRow = styled.div`
 
 function GlobalPage() {
   // get data for lists and totals
-  const allPairs = useAllPairData()
-  const allTokens = useAllTokenData()
+  const allPairs = useLast24HourPairData(ONE_MINUTE)
+  const allTokens = useTokenDayDataData(ONE_MINUTE)
   const transactions = useGlobalTransactions()
+
   const { totalLiquidityUSD, oneDayVolumeUSD, volumeChangeUSD, liquidityChangeUSD } = useGlobalData()
 
   // breakpoints

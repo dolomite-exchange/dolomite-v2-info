@@ -4,6 +4,8 @@ import 'feather-icons'
 import { TYPE } from '../Theme'
 import Panel from '../components/Panel'
 import { useAllPairData } from '../contexts/PairData'
+import { useAmmFactoryData } from '../types/ammFactoryData'
+import { ONE_MINUTE } from '../constants'
 import PairList from '../components/PairList'
 import { PageWrapper, FullWrapper } from '../components'
 import { RowBetween, AutoRow } from '../components/Row'
@@ -13,7 +15,7 @@ import QuestionHelper from '../components/QuestionHelper'
 import CheckBox from '../components/Checkbox'
 
 function AllPairsPage() {
-  const allPairs = useAllPairData()
+  const allPairs = useAmmFactoryData()
 
   useEffect(() => {
     window.scrollTo(0, 0)
