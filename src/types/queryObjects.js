@@ -1,3 +1,23 @@
+export const bundleGql = () => {
+  return `
+    id
+    ethPrice
+  `
+}
+
+export const ammFactoryGql = () => {
+  return `
+    id
+    totalVolumeUSD
+    totalVolumeETH
+    untrackedVolumeUSD
+    totalLiquidityUSD
+    totalLiquidityETH
+    txCount
+    pairCount
+  `
+}
+
 export const tokenDayDataGql = () => {
   return `
   id
@@ -28,6 +48,18 @@ export const tokenDayDataGql = () => {
   highPriceUSD
   lowPriceUSD
   closePriceUSD
+  `
+}
+
+export const tokenDayDatasGql = () => {
+  return `
+    id
+    dayStartUnix
+    ammPriceUSD
+    ammLiquidityToken
+    ammLiquidityUSD
+    dailyAmmSwapVolumeToken
+    dailyAmmSwapVolumeUSD
   `
 }
 
@@ -70,6 +102,15 @@ export const tokenHourDataGql = () => {
   `
 }
 
+export const dolomiteGlobalDataGql = () => {
+  return `
+    id
+    dayStartUnix
+    dailyAmmSwapVolumeUSD
+    ammLiquidityUSD
+  `
+}
+
 export const dolomiteDayDataGql = () => {
   return `
     id
@@ -91,6 +132,20 @@ export const dolomiteDayDataGql = () => {
     totalVaporizationCount
   `
 }
+
+export const TokenFields = `
+  fragment TokenFields on Token {
+    id
+    name
+    symbol
+    derivedETH
+    tradeVolume
+    tradeVolumeUSD
+    untrackedVolumeUSD
+    ammSwapLiquidity
+    transactionCount
+  }
+`
 
 export const tokenGql = (includeExtraValues, onlyIncludeId = false) => {
   if (onlyIncludeId) {
@@ -137,7 +192,71 @@ export const tokenGql = (includeExtraValues, onlyIncludeId = false) => {
     name
     decimals
     marketId
+    ammSwapLiquidity
     ${extraData}
+  `
+}
+
+export const ammPairDataGql = () => {
+  return `
+    id
+    token0 { ${tokenGql(false)} }
+    token1 { ${tokenGql(false)} }
+    reserve0
+    reserve1
+    reserveUSD
+    totalSupply
+    trackedReserveETH
+    reserveETH
+    volumeUSD
+    untrackedVolumeUSD
+    token0Price
+    token1Price
+    createdAtTimestamp
+  `
+}
+
+export const ammPairPriceGql = () => {
+  return `
+    token0Price
+    token1Price
+  `
+}
+
+export const ammMintGql = () => {
+  return `
+    transaction { ${transactionGql()} }
+    pair { ${ammPairDataGql()} }
+    to
+    liquidity
+    amount0
+    amount1
+    amountUSD
+  `
+}
+
+export const ammBurnGql = () => {
+  return `
+    transaction { ${transactionGql()} }
+    pair { ${ammPairDataGql()} }
+    to
+    liquidity
+    amount0
+    amount1
+    amountUSD
+  `
+}
+
+export const ammSwapGql = () => {
+  return `
+    transaction { ${transactionGql()} }
+    pair { ${ammPairDataGql()} }
+    amount0In
+    amount0Out
+    amount1In
+    amount1Out
+    amountUSD
+    to
   `
 }
 
@@ -207,10 +326,28 @@ export const transactionGql = () => {
 
 export const ammLiquidityPositionGql = () => {
   return `
-    id
+    user {
+      id
+    }
     liquidityTokenBalance
     pair {
-      ${ammPairGql(false)}
+      ${ammPairGql()}
+    }
+  `
+}
+
+export const ammLiquidityPositionSnapshotGql = () => {
+  return `
+    timestamp
+    reserveUSD
+    liquidityTokenBalance
+    liquidityTokenTotalSupply
+    reserve0
+    reserve1
+    token0PriceUSD
+    token1PriceUSD
+    pair {
+      ${ammPairGql()}
     }
   `
 }

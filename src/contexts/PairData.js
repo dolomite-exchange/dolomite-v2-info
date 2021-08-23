@@ -1,16 +1,14 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useEffect, useState } from 'react'
-
 import { client } from '../apollo/client'
 import {
   PAIR_DATA,
   PAIR_CHART,
-  FILTERED_TRANSACTIONS,
-  PAIRS_CURRENT,
   PAIRS_BULK,
   PAIRS_HISTORICAL_BULK,
+  PAIRS_CURRENT,
   HOURLY_PAIR_RATES,
-} from '../apollo/queries'
-
+} from '../types/ammPairData'
+import { FILTERED_TRANSACTIONS } from '../types/tradeData'
 import { useEthPrice } from './GlobalData'
 
 import dayjs from 'dayjs'
@@ -188,7 +186,7 @@ async function getBulkPairData(pairList, ethPrice) {
 
   try {
     let current = await client.query({
-      query: PAIRS_BULK,
+      query: PAIRS_BULK(),
       variables: {
         allPairs: pairList,
       },
@@ -205,21 +203,21 @@ async function getBulkPairData(pairList, ethPrice) {
       })
     )
 
-    let oneDayData = oneDayResult?.data?.pairs.reduce((obj, cur, i) => {
+    let oneDayData = oneDayResult?.data?.ammPairs.reduce((obj, cur, i) => {
       return { ...obj, [cur.id]: cur }
     }, {})
 
-    let twoDayData = twoDayResult?.data?.pairs.reduce((obj, cur, i) => {
+    let twoDayData = twoDayResult?.data?.ammPairs.reduce((obj, cur, i) => {
       return { ...obj, [cur.id]: cur }
     }, {})
 
-    let oneWeekData = oneWeekResult?.data?.pairs.reduce((obj, cur, i) => {
+    let oneWeekData = oneWeekResult?.data?.ammPairs.reduce((obj, cur, i) => {
       return { ...obj, [cur.id]: cur }
     }, {})
 
     let pairData = await Promise.all(
       current &&
-        current.data.pairs.map(async (pair) => {
+        current.data.ammPairs.map(async (pair) => {
           let data = pair
           let oneDayHistory = oneDayData?.[pair.id]
           if (!oneDayHistory) {
@@ -227,7 +225,7 @@ async function getBulkPairData(pairList, ethPrice) {
               query: PAIR_DATA(pair.id, b1),
               fetchPolicy: 'cache-first',
             })
-            oneDayHistory = newData.data.pairs[0]
+            oneDayHistory = newData.data.ammPairs[0]
           }
           let twoDayHistory = twoDayData?.[pair.id]
           if (!twoDayHistory) {
@@ -235,7 +233,7 @@ async function getBulkPairData(pairList, ethPrice) {
               query: PAIR_DATA(pair.id, b2),
               fetchPolicy: 'cache-first',
             })
-            twoDayHistory = newData.data.pairs[0]
+            twoDayHistory = newData.data.ammPairs[0]
           }
           let oneWeekHistory = oneWeekData?.[pair.id]
           if (!oneWeekHistory) {
@@ -243,7 +241,7 @@ async function getBulkPairData(pairList, ethPrice) {
               query: PAIR_DATA(pair.id, bWeek),
               fetchPolicy: 'cache-first',
             })
-            oneWeekHistory = newData.data.pairs[0]
+            oneWeekHistory = newData.data.ammPairs[0]
           }
           data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1)
           return data
@@ -317,7 +315,7 @@ const getPairTransactions = async (pairAddress) => {
 
   try {
     let result = await client.query({
-      query: FILTERED_TRANSACTIONS,
+      query: FILTERED_TRANSACTIONS(),
       variables: {
         allPairs: [pairAddress],
       },
@@ -344,7 +342,7 @@ const getPairChartData = async (pairAddress) => {
     let skip = 0
     while (!allFound) {
       let result = await client.query({
-        query: PAIR_CHART,
+        query: PAIR_CHART(),
         variables: {
           pairAddress: pairAddress,
           skip,
@@ -352,8 +350,8 @@ const getPairChartData = async (pairAddress) => {
         fetchPolicy: 'cache-first',
       })
       skip += 1000
-      data = data.concat(result.data.pairDayDatas)
-      if (result.data.pairDayDatas.length < 1000) {
+      data = data.concat(result.data.ammPairDayDatas)
+      if (result.data.ammPairDayDatas.length < 1000) {
         allFound = true
       }
     }
@@ -478,20 +476,18 @@ export function Updater() {
   useEffect(() => {
     async function getData() {
       // get top pairs by reserves
-      let {
-        data: { pairs },
-      } = await client.query({
-        query: PAIRS_CURRENT,
+      let result = await client.query({
+        query: PAIRS_CURRENT(),
         fetchPolicy: 'cache-first',
       })
 
       // format as array of addresses
-      const formattedPairs = pairs.map((pair) => {
+      const formattedPairs = result?.ammPairs?.map((pair) => {
         return pair.id
       })
 
       // get data for every pair in list
-      let topPairs = await getBulkPairData(formattedPairs, ethPrice)
+      let topPairs = await getBulkPairData(formattedPairs ?? [], ethPrice)
       topPairs && updateTopPairs(topPairs)
     }
     ethPrice && getData()

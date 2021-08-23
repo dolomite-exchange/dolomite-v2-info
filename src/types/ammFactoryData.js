@@ -1,15 +1,16 @@
 import { useQuery } from '@apollo/client'
 import gql from 'graphql-tag'
-import { ammPairDayDataGql } from './queryObjects'
+import { ammFactoryGql } from './queryObjects'
+// import { FACTORY_ADDRESS } from '../constants'
 
-export const AMM_FACTORY_DATA = () => {
-  return gql`
-    query ammFactory {
-      ammFactories(first: 1) {
-        ${ammPairDayDataGql(false)}
+export const AMM_FACTORY_DATA = (block) => {
+  const queryString = ` query ammFactories {
+      ammFactories(
+       ${block ? `block: { number: ${block}}` : ``} {
+        ${ammFactoryGql()}
       }
-    }
-  `
+    }`
+  return gql(queryString)
 }
 
 

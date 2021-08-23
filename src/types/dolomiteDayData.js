@@ -1,16 +1,32 @@
 import { useQuery } from '@apollo/client'
 import gql from 'graphql-tag'
-import { dolomiteDayDataGql } from './queryObjects'
+import { dolomiteDayDataGql, dolomiteGlobalDataGql } from './queryObjects'
 
-export const DOLOMITE_DAY_DATA_DATA = () => {
+export const DOLOMITE_DAY_DATA_DATA = (days) => {
   return gql`
     query dolomiteDayDataForPastMonth {
       dolomiteDayData(
           orderBy: dayStartUnix,
           orderDirection: desc,
-          first: 30
+          first: ${days}
       ) {
           ${dolomiteDayDataGql()}
+      }
+    }
+  `
+}
+
+export const DOLOMITE_GLOBAL_DATA = () => {
+  return gql`
+    query dolomiteDatas($startTime: Int!, $skip: Int!) {
+      dolomiteDayDatas(
+        first: 1000, 
+        skip: $skip, 
+        where: { dayStartUnix_gt: $startTime }, 
+        orderBy: dayStartUnix, 
+        orderDirection: asc
+      ) {
+        ${dolomiteGlobalDataGql()}
       }
     }
   `
