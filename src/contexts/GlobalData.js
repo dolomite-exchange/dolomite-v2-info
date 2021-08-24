@@ -14,7 +14,7 @@ import { DOLOMITE_GLOBAL_DATA } from '../types/dolomiteDayData'
 import { AMM_FACTORY_DATA } from '../types/ammFactoryData'
 import { ALL_TOKEN_DATA } from '../types/tokenData'
 import { ALL_PAIR_DATA } from '../types/ammPairData'
-import { TRADE_DATA } from '../types/tradeData'
+import { TRANSACTION_DATA } from '../types/transactionData'
 import { ETH_DATA } from '../types/ethData'
 import { AMM_LP_PER_PAIR } from '../types/ammLiquidityPositionData'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
@@ -430,7 +430,7 @@ const getGlobalTransactions = async () => {
 
   try {
     let result = await client.query({
-      query: TRADE_DATA(),
+      query: TRANSACTION_DATA(),
       fetchPolicy: 'cache-first',
     })
     transactions.mints = []

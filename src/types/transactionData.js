@@ -1,15 +1,19 @@
 import gql from 'graphql-tag'
-import { tradeGql, ammMintGql, ammBurnGql, ammSwapGql } from './queryObjects'
+import { ammMintGql, ammBurnGql, ammSwapGql } from './queryObjects'
 
-export const TRADE_DATA = () => {
+export const TRANSACTION_DATA = () => {
   return gql`
-    query trades {
-      trades(
-        orderBy: serialId,
-        orderDirection: desc,
-        first: 100
-      ) {
-        ${tradeGql()}
+    query transactions {
+      transactions(first: 100, orderBy: timestamp, orderDirection: desc) {
+        ammMints(orderBy: timestamp, orderDirection: desc) {
+          ${ammMintGql()}
+        }
+        ammBurns(orderBy: timestamp, orderDirection: desc) {
+          ${ammBurnGql()}
+        }
+        ammSwaps(orderBy: timestamp, orderDirection: desc) {
+          ${ammSwapGql()}
+        }
       }
     }
   `

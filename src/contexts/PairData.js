@@ -8,7 +8,7 @@ import {
   PAIRS_CURRENT,
   HOURLY_PAIR_RATES,
 } from '../types/ammPairData'
-import { FILTERED_TRANSACTIONS } from '../types/tradeData'
+import { FILTERED_TRANSACTIONS } from '../types/transactionData'
 import { useEthPrice } from './GlobalData'
 
 import dayjs from 'dayjs'

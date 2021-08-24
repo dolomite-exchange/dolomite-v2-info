@@ -115,10 +115,10 @@ function App() {
             </WarningBanner>
           </WarningWrapper>
         )}
-        {globalData &&
+       {/* {globalData &&
         Object.keys(globalData).length > 0 &&
         globalChartData &&
-        Object.keys(globalChartData).length > 0 ? (
+        Object.keys(globalChartData).length > 0 ? (*/}
           <BrowserRouter>
             <Route component={GoogleAnalyticsReporter} />
             <Switch>
@@ -204,9 +204,9 @@ function App() {
               <Redirect to="/home" />
             </Switch>
           </BrowserRouter>
-        ) : (
+    {/*    ) : (
           <LocalLoader fill="true" />
-        )}
+        )}*/}
       </AppWrapper>
     </ApolloProvider>
   )

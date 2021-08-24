@@ -54,19 +54,6 @@ export const USER_TRANSACTIONS = () => {
   `
 }
 
-export const USER_MINTS_BUNRS_PER_PAIR = () => {
-  return gql`
-    query events($user: Bytes!, $pair: Bytes!) {
-      ammMints(where: { to: $user, pair: $pair }) {
-        ${ammMintGql()}
-      }
-      ammBurns(where: { sender: $user, pair: $pair }) {
-        ${ammBurnGql()}
-      }
-    }
-  `
-}
-
 export const MINING_POSITIONS = (account) => {
   const queryString = `
     query users {
@@ -90,3 +77,36 @@ export const MINING_POSITIONS = (account) => {
   `
   return gql(queryString)
 }
+
+export const USER_MINTS_BUNRS_PER_PAIR = gql`
+  query events($user: Bytes!, $pair: Bytes!) {
+    ammMints(where: { to: $user, pair: $pair }) {
+      amountUSD
+      amount0
+      amount1
+      timestamp
+      pair {
+        token0 {
+          id
+        }
+        token1 {
+          id
+        }
+      }
+    }
+    ammBurns(where: { sender: $user, pair: $pair }) {
+      amountUSD
+      amount0
+      amount1
+      timestamp
+      pair {
+        token0 {
+          id
+        }
+        token1 {
+          id
+        }
+      }
+    }
+  }
+`
