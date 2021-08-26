@@ -172,7 +172,7 @@ function SideNav({ history }) {
               </Link>
             </HeaderText>
             <HeaderText>
-              <Link href="https://discord.com/invite/FCfyBSbCU5" target="_blank">
+              <Link href="https://discord.gg/QaENmNV" target="_blank">
                 Discord
               </Link>
             </HeaderText>
@@ -181,7 +181,7 @@ function SideNav({ history }) {
                 Twitter
               </Link>
             </HeaderText>
-            <Toggle isActive={isDark} toggle={toggleDarkMode} />
+           {/* <Toggle isActive={isDark} toggle={toggleDarkMode} />*/}
           </AutoColumn>
           {!below1180 && (
             <Polling style={{ marginLeft: '.5rem' }}>

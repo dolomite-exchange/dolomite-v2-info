@@ -480,6 +480,7 @@ export function Updater() {
         query: PAIRS_CURRENT(),
         fetchPolicy: 'cache-first',
       })
+      console.log(result)
 
       // format as array of addresses
       const formattedPairs = result?.ammPairs?.map((pair) => {
