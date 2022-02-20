@@ -179,8 +179,8 @@ export function useLatestBlocks() {
           query: SUBGRAPH_HEALTH,
         })
         .then((res) => {
-          const syncedBlock = res.data.indexingStatusForCurrentVersion.chains[0].latestBlock.number
-          const headBlock = res.data.indexingStatusForCurrentVersion.chains[0].chainHeadBlock.number
+          const syncedBlock = res.data.indexingStatusForCurrentVersion?.chains[0].latestBlock.number
+          const headBlock = res.data.indexingStatusForCurrentVersion?.chains[0].chainHeadBlock.number
           if (syncedBlock && headBlock) {
             updateLatestBlock(syncedBlock)
             updateHeadBlock(headBlock)

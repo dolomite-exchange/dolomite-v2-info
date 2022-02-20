@@ -3,7 +3,7 @@ import { FACTORY_ADDRESS, BUNDLE_ID } from '../constants'
 
 export const SUBGRAPH_HEALTH = gql`
   query health {
-    indexingStatusForCurrentVersion(subgraphName: "uniswap/uniswap-v2") {
+    indexingStatusForCurrentVersion(subgraphName: "/studio/subgraph/dolomite-v2-mumbai") {
       synced
       health
       chains {
@@ -420,7 +420,7 @@ export const PAIR_DAY_DATA_BULK = (pairs, startTimestamp) => {
 }
 
 export const GLOBAL_CHART = gql`
-  query uniswapDayDatas($startTime: Int!, $skip: Int!) {
+  query dolomiteDatas($startTime: Int!, $skip: Int!) {
     uniswapDayDatas(first: 1000, skip: $skip, where: { date_gt: $startTime }, orderBy: date, orderDirection: asc) {
       id
       date

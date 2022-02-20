@@ -10,15 +10,13 @@ import {
   get2DayPercentChange,
   getTimeframe,
 } from '../utils'
-import {
-  GLOBAL_DATA,
-  GLOBAL_TXNS,
-  GLOBAL_CHART,
-  ETH_PRICE,
-  ALL_PAIRS,
-  ALL_TOKENS,
-  TOP_LPS_PER_PAIRS,
-} from '../apollo/queries'
+import { DOLOMITE_GLOBAL_DATA } from '../types/dolomiteDayData'
+import { AMM_FACTORY_DATA } from '../types/ammFactoryData'
+import { ALL_TOKEN_DATA } from '../types/tokenData'
+import { ALL_PAIR_DATA } from '../types/ammPairData'
+import { TRANSACTION_DATA } from '../types/transactionData'
+import { ETH_DATA } from '../types/ethData'
+import { AMM_LP_PER_PAIR } from '../types/ammLiquidityPositionData'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import { useAllPairData } from './PairData'
 import { useTokenChartDataCombined } from './TokenData'
@@ -244,60 +242,60 @@ async function getGlobalData(ethPrice, oldEthPrice) {
 
     // fetch the global data
     let result = await client.query({
-      query: GLOBAL_DATA(),
+      query: AMM_FACTORY_DATA(),
       fetchPolicy: 'cache-first',
     })
-    data = result.data.uniswapFactories[0]
+    data = result.data.ammFactories[0]
 
     // fetch the historical data
     let oneDayResult = await client.query({
-      query: GLOBAL_DATA(oneDayBlock?.number),
+      query: AMM_FACTORY_DATA(oneDayBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    oneDayData = oneDayResult.data.uniswapFactories[0]
+    oneDayData = oneDayResult.data.ammFactories[0]
 
     let twoDayResult = await client.query({
-      query: GLOBAL_DATA(twoDayBlock?.number),
+      query: AMM_FACTORY_DATA(twoDayBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    twoDayData = twoDayResult.data.uniswapFactories[0]
+    twoDayData = twoDayResult.data.ammFactories[0]
 
     let oneWeekResult = await client.query({
-      query: GLOBAL_DATA(oneWeekBlock?.number),
+      query: AMM_FACTORY_DATA(oneWeekBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    const oneWeekData = oneWeekResult.data.uniswapFactories[0]
+    const oneWeekData = oneWeekResult.data.ammFactories[0]
 
     let twoWeekResult = await client.query({
-      query: GLOBAL_DATA(twoWeekBlock?.number),
+      query: AMM_FACTORY_DATA(twoWeekBlock?.number),
       fetchPolicy: 'cache-first',
     })
-    const twoWeekData = twoWeekResult.data.uniswapFactories[0]
-
+    const twoWeekData = twoWeekResult.data.ammFactories[0]
+    
     if (data && oneDayData && twoDayData && twoWeekData) {
       let [oneDayVolumeUSD, volumeChangeUSD] = get2DayPercentChange(
-        data.totalVolumeUSD,
-        oneDayData.totalVolumeUSD,
-        twoDayData.totalVolumeUSD
+        data.totalAmmVolumeUSD,
+        oneDayData.totalAmmVolumeUSD,
+        twoDayData.totalAmmVolumeUSD
       )
 
       const [oneWeekVolume, weeklyVolumeChange] = get2DayPercentChange(
         data.totalVolumeUSD,
-        oneWeekData.totalVolumeUSD,
-        twoWeekData.totalVolumeUSD
+        oneWeekData.totalAmmVolumeUSD,
+        twoWeekData.totalAmmVolumeUSD
       )
 
       const [oneDayTxns, txnChange] = get2DayPercentChange(
-        data.txCount,
-        oneDayData.txCount ? oneDayData.txCount : 0,
-        twoDayData.txCount ? twoDayData.txCount : 0
+        data.transactionCount,
+        oneDayData.transactionCount ? oneDayData.transactionCount : 0,
+        twoDayData.transactionCount ? twoDayData.transactionCount : 0
       )
 
       // format the total liquidity in USD
-      data.totalLiquidityUSD = data.totalLiquidityETH * ethPrice
+      data.totalLiquidityUSD = data.ammLiquidityUSD
       const liquidityChangeUSD = getPercentChange(
-        data.totalLiquidityETH * ethPrice,
-        oneDayData.totalLiquidityETH * oldEthPrice
+        data.ammLiquidityUSD,
+        oneDayData.ammLiquidityUSD
       )
 
       // add relevant fields with the calculated amounts
@@ -334,7 +332,7 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
   try {
     while (!allFound) {
       let result = await client.query({
-        query: GLOBAL_CHART,
+        query: DOLOMITE_GLOBAL_DATA(),
         variables: {
           startTime: oldestDateToFetch,
           skip,
@@ -342,13 +340,13 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
         fetchPolicy: 'cache-first',
       })
       skip += 1000
-      data = data.concat(result.data.uniswapDayDatas)
-      if (result.data.uniswapDayDatas.length < 1000) {
+      data = data.concat(result.data.dolomiteDayDatas)
+      if (result.data.dolomiteDayDatas.length < 1000) {
         allFound = true
       }
     }
 
-    if (data) {
+    if (data && data[0]) {
       let dayIndexSet = new Set()
       let dayIndexArray = []
       const oneDay = 24 * 60 * 60
@@ -356,14 +354,14 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
       // for each day, parse the daily volume and format for chart array
       data.forEach((dayData, i) => {
         // add the day index to the set of days
-        dayIndexSet.add((data[i].date / oneDay).toFixed(0))
+        dayIndexSet.add((data[i].dayStartUnix / oneDay).toFixed(0))
         dayIndexArray.push(data[i])
-        dayData.dailyVolumeUSD = parseFloat(dayData.dailyVolumeUSD)
+        dayData.dailyAmmSwapVolumeUSD = parseFloat(dayData.dailyAmmSwapVolumeUSD)
       })
 
       // fill in empty days ( there will be no day datas if no trades made that day )
-      let timestamp = data[0].date ? data[0].date : oldestDateToFetch
-      let latestLiquidityUSD = data[0].totalLiquidityUSD
+      let timestamp = data[0].dayStartUnix ? data[0].dayStartUnix : oldestDateToFetch
+      let latestLiquidityUSD = data[0].ammLiquidityUSD
       let latestDayDats = data[0].mostLiquidTokens
       let index = 1
       while (timestamp < utcEndTime.unix() - oneDay) {
@@ -378,7 +376,7 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
             mostLiquidTokens: latestDayDats,
           })
         } else {
-          latestLiquidityUSD = dayIndexArray[index].totalLiquidityUSD
+          latestLiquidityUSD = dayIndexArray[index].ammLiquidityUSD
           latestDayDats = dayIndexArray[index].mostLiquidTokens
           index = index + 1
         }
@@ -432,26 +430,26 @@ const getGlobalTransactions = async () => {
 
   try {
     let result = await client.query({
-      query: GLOBAL_TXNS,
+      query: TRANSACTION_DATA(),
       fetchPolicy: 'cache-first',
     })
     transactions.mints = []
     transactions.burns = []
     transactions.swaps = []
-    result?.data?.transactions &&
-      result.data.transactions.map((transaction) => {
-        if (transaction.mints.length > 0) {
-          transaction.mints.map((mint) => {
+    result?.data?.transaction &&
+      result.data.transaction.map((txn) => {
+        if (txn.ammMints.length > 0) {
+          txn.ammMints.map((mint) => {
             return transactions.mints.push(mint)
           })
         }
-        if (transaction.burns.length > 0) {
-          transaction.burns.map((burn) => {
+        if (txn.ammBurns.length > 0) {
+          txn.ammBurns.map((burn) => {
             return transactions.burns.push(burn)
           })
         }
-        if (transaction.swaps.length > 0) {
-          transaction.swaps.map((swap) => {
+        if (txn.ammSwaps.length > 0) {
+          txn.ammSwaps.map((swap) => {
             return transactions.swaps.push(swap)
           })
         }
@@ -478,11 +476,11 @@ const getEthPrice = async () => {
   try {
     let oneDayBlock = await getBlockFromTimestamp(utcOneDayBack)
     let result = await client.query({
-      query: ETH_PRICE(),
+      query: ETH_DATA(),
       fetchPolicy: 'cache-first',
     })
     let resultOneDay = await client.query({
-      query: ETH_PRICE(oneDayBlock),
+      query: ETH_DATA(oneDayBlock),
       fetchPolicy: 'cache-first',
     })
     const currentPrice = result?.data?.bundles[0]?.ethPrice
@@ -510,15 +508,15 @@ async function getAllPairsOnUniswap() {
     let skipCount = 0
     while (!allFound) {
       let result = await client.query({
-        query: ALL_PAIRS,
+        query: ALL_PAIR_DATA(),
         variables: {
           skip: skipCount,
         },
         fetchPolicy: 'cache-first',
       })
       skipCount = skipCount + PAIRS_TO_FETCH
-      pairs = pairs.concat(result?.data?.pairs)
-      if (result?.data?.pairs.length < PAIRS_TO_FETCH || pairs.length > PAIRS_TO_FETCH) {
+      pairs = pairs.concat(result?.data?.ammPairs)
+      if (result?.data?.ammPairs.length < PAIRS_TO_FETCH || pairs.length > PAIRS_TO_FETCH) {
         allFound = true
       }
     }
@@ -538,7 +536,7 @@ async function getAllTokensOnUniswap() {
     let tokens = []
     while (!allFound) {
       let result = await client.query({
-        query: ALL_TOKENS,
+        query: ALL_TOKEN_DATA(),
         variables: {
           skip: skipCount,
         },
@@ -699,7 +697,7 @@ export function useTopLps() {
           // for each one, fetch top LPs
           try {
             const { data: results } = await client.query({
-              query: TOP_LPS_PER_PAIRS,
+              query: AMM_LP_PER_PAIR(),
               variables: {
                 pair: pair.toString(),
               },

@@ -4,6 +4,15 @@ import Vibrant from 'node-vibrant'
 import { hex } from 'wcag-contrast'
 import { isAddress } from '../utils'
 import copy from 'copy-to-clipboard'
+import { useWeb3React as useWeb3ReactCore } from '@web3-react/core'
+import { ChainId, NetworkContextName } from '../constants'
+
+export function useActiveWeb3React() {
+  const context = useWeb3ReactCore()
+  const contextNetwork = useWeb3ReactCore(NetworkContextName)
+  const result = context.active ? context : contextNetwork
+  return { ...result, chainId: result.chainId ?? ChainId.MAINNET, account: result.account ?? undefined }
+}
 
 export function useColor(tokenAddress, token) {
   const [color, setColor] = useState('#2172E5')

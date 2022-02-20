@@ -1,13 +1,8 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useEffect, useState } from 'react'
 import { useAllPairData, usePairData } from './PairData'
-import { client, stakingClient } from '../apollo/client'
-import {
-  USER_TRANSACTIONS,
-  USER_POSITIONS,
-  USER_HISTORY,
-  PAIR_DAY_DATA_BULK,
-  MINING_POSITIONS,
-} from '../apollo/queries'
+import { client } from '../apollo/client' //stakingClient
+import { USER_TRANSACTIONS, USER_POSITIONS, USER_HISTORY } from '../types/userData'
+import { PAIR_DAY_DATA_BULK } from '../types/ammPairData'
 import { useTimeframe, useStartTimestamp } from './Application'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -167,7 +162,7 @@ export function useUserTransactions(account) {
     async function fetchData(account) {
       try {
         let result = await client.query({
-          query: USER_TRANSACTIONS,
+          query: USER_TRANSACTIONS(),
           variables: {
             user: account,
           },
@@ -205,7 +200,7 @@ export function useUserSnapshots(account) {
         let found = false
         while (!found) {
           let result = await client.query({
-            query: USER_HISTORY,
+            query: USER_HISTORY(),
             variables: {
               skip: skip,
               user: account,
@@ -495,18 +490,18 @@ export function useMiningPositions(account) {
     async function fetchData(account) {
       try {
         let miningPositionData = []
-        let result = await stakingClient.query({
-          query: MINING_POSITIONS(account),
-          fetchPolicy: 'no-cache',
-        })
-        if (!result?.data?.user?.miningPosition) {
-          return
-        }
-        miningPositionData = result.data.user.miningPosition
-        for (const miningPosition of miningPositionData) {
-          const pairAddress = miningPosition.miningPool.pair.id
-          miningPosition.pairData = allPairData[pairAddress]
-        }
+        // let result = await stakingClient.query({
+        //   query: MINING_POSITIONS(account),
+        //   fetchPolicy: 'no-cache',
+        // })
+        // if (!result?.data?.user?.miningPosition) {
+        //   return
+        // }
+        // miningPositionData = result.data.user.miningPosition
+        // for (const miningPosition of miningPositionData) {
+        //   const pairAddress = miningPosition.miningPool.pair.id
+        //   miningPosition.pairData = allPairData[pairAddress]
+        // }
         updateMiningPositions(account, miningPositionData)
       } catch (e) {
         console.log(e)

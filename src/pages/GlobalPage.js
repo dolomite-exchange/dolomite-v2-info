@@ -50,6 +50,7 @@ function GlobalPage() {
   const allPairs = useAllPairData()
   const allTokens = useAllTokenData()
   const transactions = useGlobalTransactions()
+
   const { totalLiquidityUSD, oneDayVolumeUSD, volumeChangeUSD, liquidityChangeUSD } = useGlobalData()
 
   // breakpoints

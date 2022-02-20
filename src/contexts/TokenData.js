@@ -1,16 +1,10 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useEffect } from 'react'
 
 import { client } from '../apollo/client'
-import {
-  TOKEN_DATA,
-  FILTERED_TRANSACTIONS,
-  TOKEN_CHART,
-  TOKENS_CURRENT,
-  TOKENS_DYNAMIC,
-  PRICES_BY_BLOCK,
-  PAIR_DATA,
-} from '../apollo/queries'
-
+import { TOKEN_DATA, TOKENS_CURRENT, TOKEN_CHART, TOKENS_DYNAMIC } from '../types/tokenData'
+import { PAIR_DATA } from '../types/ammPairData'
+import { PRICES_BY_BLOCK } from '../types/ethData'
+import { FILTERED_TRANSACTIONS } from '../types/transactionData'
 import { useEthPrice } from './GlobalData'
 
 import dayjs from 'dayjs'
@@ -594,7 +588,7 @@ const getTokenChartData = async (tokenAddress) => {
     let skip = 0
     while (!allFound) {
       let result = await client.query({
-        query: TOKEN_CHART,
+        query: TOKEN_CHART(),
         variables: {
           tokenAddr: tokenAddress,
           skip,
@@ -613,15 +607,15 @@ const getTokenChartData = async (tokenAddress) => {
     const oneDay = 24 * 60 * 60
     data.forEach((dayData, i) => {
       // add the day index to the set of days
-      dayIndexSet.add((data[i].date / oneDay).toFixed(0))
+      dayIndexSet.add((data[i].dayStartUnix / oneDay).toFixed(0))
       dayIndexArray.push(data[i])
       dayData.dailyVolumeUSD = parseFloat(dayData.dailyVolumeUSD)
     })
 
     // fill in empty days
-    let timestamp = data[0] && data[0].date ? data[0].date : startTime
-    let latestLiquidityUSD = data[0] && data[0].totalLiquidityUSD
-    let latestPriceUSD = data[0] && data[0].priceUSD
+    let timestamp = data[0] && data[0].dayStartUnix ? data[0].dayStartUnix : startTime
+    let latestLiquidityUSD = data[0] && data[0].ammLiquidityUSD
+    let latestPriceUSD = data[0] && data[0].ammPriceUSD
     let latestPairDatas = data[0] && data[0].mostLiquidPairs
     let index = 1
     while (timestamp < utcEndTime.startOf('minute').unix() - oneDay) {
