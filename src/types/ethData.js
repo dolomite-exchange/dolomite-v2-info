@@ -48,5 +48,5 @@ export const PRICES_BY_BLOCK = (tokenAddress, blocks) => {
     `
   )
 
-  return(queryString)
+  return queryString
 }

@@ -343,7 +343,13 @@ export const USER_TRANSACTIONS = gql`
 
 export const PAIR_CHART = gql`
   query pairDayDatas($pairAddress: Bytes!, $skip: Int!) {
-    pairDayDatas(first: 1000, skip: $skip, orderBy: dayStartUnix, orderDirection: asc, where: { pairAddress: $pairAddress }) {
+    pairDayDatas(
+      first: 1000
+      skip: $skip
+      orderBy: dayStartUnix
+      orderDirection: asc
+      where: { pairAddress: $pairAddress }
+    ) {
       id
       dayStartUnix
       dailyAmmVolumeToken0

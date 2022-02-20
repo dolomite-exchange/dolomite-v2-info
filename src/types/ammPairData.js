@@ -2,7 +2,7 @@ import gql from 'graphql-tag'
 import { ammPairDataGql, ammPairDayDataGql, ammPairPriceGql, ammPairGql } from './queryObjects'
 
 export const ALL_PAIR_DATA = () => {
-  return gql `
+  return gql`
     query ammPairs($skip: Int!) {
       ammPairs(
         first: 500, 
@@ -45,7 +45,7 @@ export const PAIR_CHART = () => {
   `
 }
 
-export const PAIRS_BULK  = () => {
+export const PAIRS_BULK = () => {
   return gql`
     query ammPairs($allPairs: [Bytes]!) {
       ammPairs(
@@ -150,4 +150,3 @@ export const PAIR_SEARCH = () => {
     }
   `
 }
-

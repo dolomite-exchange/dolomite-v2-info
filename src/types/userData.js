@@ -1,8 +1,14 @@
 import gql from 'graphql-tag'
-import { ammLiquidityPositionGql, ammLiquidityPositionSnapshotGql, ammMintGql, ammBurnGql, ammSwapGql } from './queryObjects'
+import {
+  ammLiquidityPositionGql,
+  ammLiquidityPositionSnapshotGql,
+  ammMintGql,
+  ammBurnGql,
+  ammSwapGql,
+} from './queryObjects'
 
 export const USER_HISTORY = () => {
-  return  gql`
+  return gql`
     query snapshots($user: Bytes!, $skip: Int!) {
       ammLiquidityPositionSnapshots(
         first: 1000, 

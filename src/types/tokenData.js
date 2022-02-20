@@ -2,7 +2,7 @@ import gql from 'graphql-tag'
 import { tokenGql, TokenFields, tokenDayDatasGql } from './queryObjects'
 
 export const ALL_TOKEN_DATA = () => {
-  return gql `
+  return gql`
     query tokens($skip: Int!) {
       tokens(
         first: 500, 
@@ -65,11 +65,7 @@ export const TOKENS_CURRENT = () => {
   return gql`
     ${TokenFields}
     query tokens {
-      tokens(
-        first: 200, 
-        orderBy: tradeVolumeUSD, 
-        orderDirection: desc
-      ) {
+      tokens(first: 200, orderBy: tradeVolumeUSD, orderDirection: desc) {
         ...TokenFields
       }
     }
@@ -92,7 +88,6 @@ export const TOKENS_DYNAMIC = (block) => {
   `
   return gql(queryString)
 }
-
 
 export const TOKEN_SEARCH = () => {
   return gql`

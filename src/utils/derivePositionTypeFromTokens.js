@@ -22,4 +22,3 @@ export default function derivePositionTypeFromTokens(heldToken, owedToken) {
     return PositionType.CROSS
   }
 }
-

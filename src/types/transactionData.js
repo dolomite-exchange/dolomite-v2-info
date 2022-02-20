@@ -19,7 +19,7 @@ export const TRANSACTION_DATA = () => {
   `
 }
 
-export const FILTERED_TRANSACTIONS = () => { 
+export const FILTERED_TRANSACTIONS = () => {
   return gql`
     query($allPairs: [Bytes]!) {
       ammMints(
@@ -49,4 +49,3 @@ export const FILTERED_TRANSACTIONS = () => {
     }
   `
 }
-
