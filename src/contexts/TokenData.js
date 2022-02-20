@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useEffect } from 'react'
 
 import { client } from '../apollo/client'
-import { TOKEN_DATA, TOKENS_CURRENT, TOKEN_CHART, TOKENS_DYNAMIC } from '../types/tokenData'
-import { PAIR_DATA } from '../types/ammPairData'
-import { PRICES_BY_BLOCK } from '../types/ethData'
-import { FILTERED_TRANSACTIONS } from '../types/transactionData'
 import {
   TOKEN_DATA,
   FILTERED_TRANSACTIONS,
