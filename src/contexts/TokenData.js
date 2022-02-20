@@ -608,7 +608,7 @@ const getTokenChartData = async (tokenAddress) => {
     let skip = 0
     while (!allFound) {
       let result = await client.query({
-        query: TOKEN_CHART(),
+        query: TOKEN_CHART,
         variables: {
           tokenAddr: tokenAddress,
           skip,
@@ -626,16 +626,19 @@ const getTokenChartData = async (tokenAddress) => {
     let dayIndexArray = []
     const oneDay = 24 * 60 * 60
     data.forEach((dayData, i) => {
+      dayData.date = data[i].dayStartUnix
+      dayData.dailyVolumeUSD = parseFloat(dayData.dailyAmmSwapVolumeUSD)
+      dayData.priceUSD = dayData.ammPriceUSD
+      dayData.totalLiquidityUSD = dayData.ammLiquidityUSD
       // add the day index to the set of days
-      dayIndexSet.add((data[i].dayStartUnix / oneDay).toFixed(0))
+      dayIndexSet.add((data[i].date / oneDay).toFixed(0))
       dayIndexArray.push(data[i])
-      dayData.dailyVolumeUSD = parseFloat(dayData.dailyVolumeUSD)
     })
 
     // fill in empty days
-    let timestamp = data[0] && data[0].dayStartUnix ? data[0].dayStartUnix : startTime
-    let latestLiquidityUSD = data[0] && data[0].ammLiquidityUSD
-    let latestPriceUSD = data[0] && data[0].ammPriceUSD
+    let timestamp = data[0] && data[0].date ? data[0].date : startTime
+    let latestLiquidityUSD = data[0] && data[0].totalLiquidityUSD
+    let latestPriceUSD = data[0] && data[0].priceUSD
     let latestPairDatas = data[0] && data[0].mostLiquidPairs
     let index = 1
     while (timestamp < utcEndTime.startOf('minute').unix() - oneDay) {

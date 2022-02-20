@@ -5,14 +5,14 @@ import { ammFactoryGql } from './queryObjects'
 
 export const AMM_FACTORY_DATA = (block) => {
   const queryString = ` query ammFactories {
-      ammFactories(
-       ${block ? `block: { number: ${block}}` : ``} {
+      ammFactories
+       ${block ? `(block: { number: ${block}})` : ``}
+      {
         ${ammFactoryGql()}
       }
     }`
   return gql(queryString)
 }
-
 
 export function useAmmFactoryData(pollIntervalMs) {
   const { loading, error, data } = useQuery(AMM_FACTORY_DATA(), {

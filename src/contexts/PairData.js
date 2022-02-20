@@ -365,15 +365,16 @@ const getPairChartData = async (pairAddress) => {
     const oneDay = 24 * 60 * 60
     data.forEach((dayData, i) => {
       // add the day index to the set of days
-      dayIndexSet.add((data[i].date / oneDay).toFixed(0))
+      dayIndexSet.add((data[i].dayStartUnix / oneDay).toFixed(0))
       dayIndexArray.push(data[i])
+      dayData.date = dayData.dayStartUnix
       dayData.dailyVolumeUSD = parseFloat(dayData.dailyVolumeUSD)
       dayData.reserveUSD = parseFloat(dayData.reserveUSD)
     })
 
     if (data[0]) {
       // fill in empty days
-      let timestamp = data[0].date ? data[0].date : startTime
+      let timestamp = data[0].dayStartUnix ? data[0].dayStartUnix : startTime
       let latestLiquidityUSD = data[0].reserveUSD
       let index = 1
       while (timestamp < utcEndTime.unix() - oneDay) {
@@ -484,7 +485,6 @@ export function Updater() {
         query: PAIRS_CURRENT(),
         fetchPolicy: 'cache-first',
       })
-      console.log(result)
 
       // format as array of addresses
       const formattedPairs = result?.ammPairs?.map((pair) => {

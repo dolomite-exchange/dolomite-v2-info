@@ -18,34 +18,6 @@ export const SUBGRAPH_HEALTH = gql`
   }
 `
 
-export const V1_DATA_QUERY = gql`
-  query uniswap($date: Int!, $date2: Int!) {
-    current: uniswap(id: "1") {
-      totalVolumeUSD
-      totalLiquidityUSD
-      txCount
-    }
-    oneDay: uniswapHistoricalDatas(where: { timestamp_lt: $date }, first: 1, orderBy: timestamp, orderDirection: desc) {
-      totalVolumeUSD
-      totalLiquidityUSD
-      txCount
-    }
-    twoDay: uniswapHistoricalDatas(
-      where: { timestamp_lt: $date2 }
-      first: 1
-      orderBy: timestamp
-      orderDirection: desc
-    ) {
-      totalVolumeUSD
-      totalLiquidityUSD
-      txCount
-    }
-    exchanges(first: 200, orderBy: ethBalance, orderDirection: desc) {
-      ethBalance
-    }
-  }
-`
-
 export const GET_BLOCK = gql`
   query blocks($timestampFrom: Int!, $timestampTo: Int!) {
     blocks(
@@ -207,7 +179,7 @@ export const USER = (block, account) => {
 
 export const USER_MINTS_BUNRS_PER_PAIR = gql`
   query events($user: Bytes!, $pair: Bytes!) {
-    mints(where: { to: $user, pair: $pair }) {
+    ammMints(where: { to: $user, pair: $pair }) {
       amountUSD
       amount0
       amount1
@@ -221,7 +193,7 @@ export const USER_MINTS_BUNRS_PER_PAIR = gql`
         }
       }
     }
-    burns(where: { sender: $user, pair: $pair }) {
+    ammBurns(where: { sender: $user, pair: $pair }) {
       amountUSD
       amount0
       amount1
@@ -300,7 +272,7 @@ export const USER_POSITIONS = gql`
 
 export const USER_TRANSACTIONS = gql`
   query transactions($user: Bytes!) {
-    mints(orderBy: timestamp, orderDirection: desc, where: { to: $user }) {
+    ammMints(orderBy: timestamp, orderDirection: desc, where: { to: $user }) {
       id
       transaction {
         id
@@ -323,7 +295,7 @@ export const USER_TRANSACTIONS = gql`
       amount1
       amountUSD
     }
-    burns(orderBy: timestamp, orderDirection: desc, where: { sender: $user }) {
+    ammBurns(orderBy: timestamp, orderDirection: desc, where: { sender: $user }) {
       id
       transaction {
         id
@@ -345,7 +317,7 @@ export const USER_TRANSACTIONS = gql`
       amount1
       amountUSD
     }
-    swaps(orderBy: timestamp, orderDirection: desc, where: { to: $user }) {
+    ammSwaps(orderBy: timestamp, orderDirection: desc, where: { to: $user }) {
       id
       transaction {
         id
@@ -371,12 +343,12 @@ export const USER_TRANSACTIONS = gql`
 
 export const PAIR_CHART = gql`
   query pairDayDatas($pairAddress: Bytes!, $skip: Int!) {
-    pairDayDatas(first: 1000, skip: $skip, orderBy: date, orderDirection: asc, where: { pairAddress: $pairAddress }) {
+    pairDayDatas(first: 1000, skip: $skip, orderBy: dayStartUnix, orderDirection: asc, where: { pairAddress: $pairAddress }) {
       id
-      date
-      dailyVolumeToken0
-      dailyVolumeToken1
-      dailyVolumeUSD
+      dayStartUnix
+      dailyAmmVolumeToken0
+      dailyAmmVolumeToken1
+      dailyAmmVolumeUSD
       reserveUSD
     }
   }
@@ -433,28 +405,10 @@ export const GLOBAL_CHART = gql`
   }
 `
 
-export const GLOBAL_DATA = (block) => {
-  const queryString = ` query uniswapFactories {
-      uniswapFactories(
-       ${block ? `block: { number: ${block}}` : ``} 
-       where: { id: "${FACTORY_ADDRESS}" }) {
-        id
-        totalVolumeUSD
-        totalVolumeETH
-        untrackedVolumeUSD
-        totalLiquidityUSD
-        totalLiquidityETH
-        txCount
-        pairCount
-      }
-    }`
-  return gql(queryString)
-}
-
 export const GLOBAL_TXNS = gql`
   query transactions {
     transactions(first: 100, orderBy: timestamp, orderDirection: desc) {
-      mints(orderBy: timestamp, orderDirection: desc) {
+      ammMints(orderBy: timestamp, orderDirection: desc) {
         transaction {
           id
           timestamp
@@ -475,7 +429,7 @@ export const GLOBAL_TXNS = gql`
         amount1
         amountUSD
       }
-      burns(orderBy: timestamp, orderDirection: desc) {
+      ammBurns(orderBy: timestamp, orderDirection: desc) {
         transaction {
           id
           timestamp
@@ -496,7 +450,7 @@ export const GLOBAL_TXNS = gql`
         amount1
         amountUSD
       }
-      swaps(orderBy: timestamp, orderDirection: desc) {
+      ammSwaps(orderBy: timestamp, orderDirection: desc) {
         transaction {
           id
           timestamp
@@ -528,7 +482,7 @@ export const ALL_TOKENS = gql`
       id
       name
       symbol
-      totalLiquidity
+      ammSwapLiquidity
     }
   }
 `
@@ -557,8 +511,8 @@ export const TOKEN_SEARCH = gql`
 `
 
 export const PAIR_SEARCH = gql`
-  query pairs($tokens: [Bytes]!, $id: String) {
-    as0: pairs(where: { token0_in: $tokens }) {
+  query ammPairs($tokens: [Bytes]!, $id: String) {
+    as0: ammPairs(where: { token0_in: $tokens }) {
       id
       token0 {
         id
@@ -571,7 +525,7 @@ export const PAIR_SEARCH = gql`
         name
       }
     }
-    as1: pairs(where: { token1_in: $tokens }) {
+    as1: ammPairs(where: { token1_in: $tokens }) {
       id
       token0 {
         id
@@ -584,7 +538,7 @@ export const PAIR_SEARCH = gql`
         name
       }
     }
-    asAddress: pairs(where: { id: $id }) {
+    asAddress: ammPairs(where: { id: $id }) {
       id
       token0 {
         id
@@ -601,8 +555,8 @@ export const PAIR_SEARCH = gql`
 `
 
 export const ALL_PAIRS = gql`
-  query pairs($skip: Int!) {
-    pairs(first: 500, skip: $skip, orderBy: trackedReserveETH, orderDirection: desc) {
+  query ammPairs($skip: Int!) {
+    ammPairs(first: 500, skip: $skip, orderBy: trackedReserveETH, orderDirection: desc) {
       id
       token0 {
         id
@@ -621,7 +575,7 @@ export const ALL_PAIRS = gql`
 const PairFields = `
   fragment PairFields on Pair {
     id
-    txCount
+    transactionCount
     token0 {
       id
       symbol
@@ -652,7 +606,7 @@ const PairFields = `
 
 export const PAIRS_CURRENT = gql`
   query pairs {
-    pairs(first: 200, orderBy: reserveUSD, orderDirection: desc) {
+    ammPairs(first: 200, orderBy: reserveUSD, orderDirection: desc) {
       id
     }
   }
@@ -662,7 +616,7 @@ export const PAIR_DATA = (pairAddress, block) => {
   const queryString = `
     ${PairFields}
     query pairs {
-      pairs(${block ? `block: {number: ${block}}` : ``} where: { id: "${pairAddress}"} ) {
+      ammPairs(${block ? `block: {number: ${block}}` : ``} where: { id: "${pairAddress}"} ) {
         ...PairFields
       }
     }`
@@ -695,8 +649,8 @@ export const MINING_POSITIONS = (account) => {
 
 export const PAIRS_BULK = gql`
   ${PairFields}
-  query pairs($allPairs: [Bytes]!) {
-    pairs(first: 500, where: { id_in: $allPairs }, orderBy: trackedReserveETH, orderDirection: desc) {
+  query ammPairs($allPairs: [Bytes]!) {
+    ammPairs(first: 500, where: { id_in: $allPairs }, orderBy: trackedReserveETH, orderDirection: desc) {
       ...PairFields
     }
   }
@@ -710,7 +664,7 @@ export const PAIRS_HISTORICAL_BULK = (block, pairs) => {
   pairsString += ']'
   let queryString = `
   query pairs {
-    pairs(first: 200, where: {id_in: ${pairsString}}, block: {number: ${block}}, orderBy: trackedReserveETH, orderDirection: desc) {
+    ammPairs(first: 200, where: {id_in: ${pairsString}}, block: {number: ${block}}, orderBy: trackedReserveETH, orderDirection: desc) {
       id
       reserveUSD
       trackedReserveETH
@@ -724,16 +678,15 @@ export const PAIRS_HISTORICAL_BULK = (block, pairs) => {
 
 export const TOKEN_CHART = gql`
   query tokenDayDatas($tokenAddr: String!, $skip: Int!) {
-    tokenDayDatas(first: 1000, skip: $skip, orderBy: date, orderDirection: asc, where: { token: $tokenAddr }) {
+    tokenDayDatas(first: 1000, skip: $skip, orderBy: dayStartUnix, orderDirection: asc, where: { token: $tokenAddr }) {
       id
-      date
-      priceUSD
-      totalLiquidityToken
-      totalLiquidityUSD
-      totalLiquidityETH
-      dailyVolumeETH
-      dailyVolumeToken
-      dailyVolumeUSD
+      dayStartUnix
+      ammPriceUSD
+      ammLiquidityToken
+      ammLiquidityUSD
+      ammLiquidityToken
+      dailyAmmSwapVolumeToken
+      dailyAmmSwapVolumeUSD
     }
   }
 `
@@ -747,17 +700,17 @@ const TokenFields = `
     tradeVolume
     tradeVolumeUSD
     untrackedVolumeUSD
-    totalLiquidity
-    txCount
+    ammSwapLiquidity
+    transactionCount
   }
 `
 
 // used for getting top tokens by daily volume
 export const TOKEN_TOP_DAY_DATAS = gql`
   query tokenDayDatas($date: Int) {
-    tokenDayDatas(first: 50, orderBy: totalLiquidityUSD, orderDirection: desc, where: { date_gt: $date }) {
+    tokenDayDatas(first: 50, orderBy: ammLiquidityUSD, orderDirection: desc, where: { dayStartUnix_gt: $date }) {
       id
-      date
+      dayStartUnix
     }
   }
 `
@@ -765,7 +718,7 @@ export const TOKEN_TOP_DAY_DATAS = gql`
 export const TOKENS_BULK = gql`
   ${TokenFields}
   query tokens($tokenAddresses: [Bytes]!) {
-    pairs(where: { id_in: $tokenAddresses }) {
+    ammPairs(where: { id_in: $tokenAddresses }) {
       ...TokenFields
     }
   }
@@ -786,8 +739,8 @@ export const TOKENS_HISTORICAL_BULK = (tokens, block) => {
       tradeVolume
       tradeVolumeUSD
       untrackedVolumeUSD
-      totalLiquidity
-      txCount
+      ammSwapLiquidity
+      transactionCount
     }
   }
   `
@@ -822,10 +775,10 @@ export const TOKEN_DATA = (tokenAddress, block) => {
       tokens(${block ? `block : {number: ${block}}` : ``} where: {id:"${tokenAddress}"}) {
         ...TokenFields
       }
-      pairs0: pairs(where: {token0: "${tokenAddress}"}, first: 50, orderBy: reserveUSD, orderDirection: desc){
+      pairs0: ammPairs(where: {token0: "${tokenAddress}"}, first: 50, orderBy: reserveUSD, orderDirection: desc) {
         id
       }
-      pairs1: pairs(where: {token1: "${tokenAddress}"}, first: 50, orderBy: reserveUSD, orderDirection: desc){
+      pairs1: ammPairs(where: {token1: "${tokenAddress}"}, first: 50, orderBy: reserveUSD, orderDirection: desc) {
         id
       }
     }
@@ -835,7 +788,7 @@ export const TOKEN_DATA = (tokenAddress, block) => {
 
 export const FILTERED_TRANSACTIONS = gql`
   query ($allPairs: [Bytes]!) {
-    mints(first: 20, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
+    ammMints(first: 20, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
       transaction {
         id
         timestamp
@@ -856,7 +809,7 @@ export const FILTERED_TRANSACTIONS = gql`
       amount1
       amountUSD
     }
-    burns(first: 20, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
+    ammBurns(first: 20, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
       transaction {
         id
         timestamp
@@ -877,7 +830,7 @@ export const FILTERED_TRANSACTIONS = gql`
       amount1
       amountUSD
     }
-    swaps(first: 30, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
+    ammSwaps(first: 30, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
       transaction {
         id
         timestamp

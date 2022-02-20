@@ -271,7 +271,7 @@ async function getGlobalData(ethPrice, oldEthPrice) {
       fetchPolicy: 'cache-first',
     })
     const twoWeekData = twoWeekResult.data.ammFactories[0]
-    
+
     if (data && oneDayData && twoDayData && twoWeekData) {
       let [oneDayVolumeUSD, volumeChangeUSD] = get2DayPercentChange(
         data.totalAmmVolumeUSD,
@@ -293,10 +293,7 @@ async function getGlobalData(ethPrice, oldEthPrice) {
 
       // format the total liquidity in USD
       data.totalLiquidityUSD = data.ammLiquidityUSD
-      const liquidityChangeUSD = getPercentChange(
-        data.ammLiquidityUSD,
-        oneDayData.ammLiquidityUSD
-      )
+      const liquidityChangeUSD = getPercentChange(data.ammLiquidityUSD, oneDayData.ammLiquidityUSD)
 
       // add relevant fields with the calculated amounts
       data.oneDayVolumeUSD = oneDayVolumeUSD
@@ -356,6 +353,7 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
         // add the day index to the set of days
         dayIndexSet.add((data[i].dayStartUnix / oneDay).toFixed(0))
         dayIndexArray.push(data[i])
+        dayData.date = dayData.dayStartUnix
         dayData.dailyAmmSwapVolumeUSD = parseFloat(dayData.dailyAmmSwapVolumeUSD)
       })
 

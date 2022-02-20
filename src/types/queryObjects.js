@@ -8,12 +8,10 @@ export const bundleGql = () => {
 export const ammFactoryGql = () => {
   return `
     id
-    totalVolumeUSD
-    totalVolumeETH
-    untrackedVolumeUSD
-    totalLiquidityUSD
-    totalLiquidityETH
-    txCount
+    totalAmmVolumeUSD
+    untrackedAmmVolumeUSD
+    ammLiquidityUSD
+    transactionCount
     pairCount
   `
 }

@@ -141,6 +141,8 @@ export async function splitQuery(query, localClient, vars, list, skipCount = 100
   return fetchedData
 }
 
+const offset = 33000
+
 /**
  * @notice Fetches first block after a given timestamp
  * @dev Query speed is optimized by limiting to a 600-second period
@@ -155,7 +157,8 @@ export async function getBlockFromTimestamp(timestamp) {
     },
     fetchPolicy: 'cache-first',
   })
-  return result?.data?.blocks?.[0]?.number
+  // Only do this on MATIC to deal w/ mainnet blocks being ~100,000 blocks ahead of testnet
+  return (parseInt(result?.data?.blocks?.[0]?.number) - offset).toString()
 }
 
 /**
@@ -178,7 +181,7 @@ export async function getBlocksFromTimestamps(timestamps, skipCount = 500) {
       if (fetchedData[t].length > 0) {
         blocks.push({
           timestamp: t.split('t')[1],
-          number: fetchedData[t][0]['number'],
+          number: (parseInt(fetchedData[t][0]['number']) - offset).toString(),
         })
       }
     }
