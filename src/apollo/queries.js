@@ -752,6 +752,48 @@ const TokenFields = `
   }
 `
 
+// used for getting top tokens by daily volume
+export const TOKEN_TOP_DAY_DATAS = gql`
+  query tokenDayDatas($date: Int) {
+    tokenDayDatas(first: 50, orderBy: totalLiquidityUSD, orderDirection: desc, where: { date_gt: $date }) {
+      id
+      date
+    }
+  }
+`
+
+export const TOKENS_BULK = gql`
+  ${TokenFields}
+  query tokens($tokenAddresses: [Bytes]!) {
+    pairs(where: { id_in: $tokenAddresses }) {
+      ...TokenFields
+    }
+  }
+`
+export const TOKENS_HISTORICAL_BULK = (tokens, block) => {
+  let tokenString = `[`
+  tokens.map((token) => {
+    return (tokenString += `"${token}",`)
+  })
+  tokenString += ']'
+  let queryString = `
+  query tokens {
+    tokens(first: 50, where: {id_in: ${tokenString}}, ${block ? 'block: {number: ' + block + '}' : ''}  ) {
+      id
+      name
+      symbol
+      derivedETH
+      tradeVolume
+      tradeVolumeUSD
+      untrackedVolumeUSD
+      totalLiquidity
+      txCount
+    }
+  }
+  `
+  return gql(queryString)
+}
+
 export const TOKENS_CURRENT = gql`
   ${TokenFields}
   query tokens {
@@ -792,7 +834,7 @@ export const TOKEN_DATA = (tokenAddress, block) => {
 }
 
 export const FILTERED_TRANSACTIONS = gql`
-  query($allPairs: [Bytes]!) {
+  query ($allPairs: [Bytes]!) {
     mints(first: 20, where: { pair_in: $allPairs }, orderBy: timestamp, orderDirection: desc) {
       transaction {
         id

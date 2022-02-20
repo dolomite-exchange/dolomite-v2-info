@@ -5,6 +5,16 @@ import { TOKEN_DATA, TOKENS_CURRENT, TOKEN_CHART, TOKENS_DYNAMIC } from '../type
 import { PAIR_DATA } from '../types/ammPairData'
 import { PRICES_BY_BLOCK } from '../types/ethData'
 import { FILTERED_TRANSACTIONS } from '../types/transactionData'
+import {
+  TOKEN_DATA,
+  FILTERED_TRANSACTIONS,
+  TOKEN_CHART,
+  TOKEN_TOP_DAY_DATAS,
+  PRICES_BY_BLOCK,
+  PAIR_DATA,
+  TOKENS_HISTORICAL_BULK,
+} from '../apollo/queries'
+
 import { useEthPrice } from './GlobalData'
 
 import dayjs from 'dayjs'
@@ -36,7 +46,7 @@ dayjs.extend(utc)
 
 const TokenDataContext = createContext()
 
-function useTokenDataContext() {
+export function useTokenDataContext() {
   return useContext(TokenDataContext)
 }
 
@@ -222,18 +232,32 @@ const getTopTokens = async (ethPrice, ethPriceOld) => {
   let twoDayBlock = await getBlockFromTimestamp(utcTwoDaysBack)
 
   try {
+    // need to get the top tokens by liquidity by need token day datas
+    const currentDate = parseInt(Date.now() / 86400 / 1000) * 86400 - 86400
+
+    let tokenids = await client.query({
+      query: TOKEN_TOP_DAY_DATAS,
+      fetchPolicy: 'network-only',
+      variables: { date: currentDate },
+    })
+
+    const ids = tokenids?.data?.tokenDayDatas?.reduce((accum, entry) => {
+      accum.push(entry.id.slice(0, 42))
+      return accum
+    }, [])
+
     let current = await client.query({
-      query: TOKENS_CURRENT,
+      query: TOKENS_HISTORICAL_BULK(ids),
       fetchPolicy: 'cache-first',
     })
 
     let oneDayResult = await client.query({
-      query: TOKENS_DYNAMIC(oneDayBlock),
+      query: TOKENS_HISTORICAL_BULK(ids, oneDayBlock),
       fetchPolicy: 'cache-first',
     })
 
     let twoDayResult = await client.query({
-      query: TOKENS_DYNAMIC(twoDayBlock),
+      query: TOKENS_HISTORICAL_BULK(ids, twoDayBlock),
       fetchPolicy: 'cache-first',
     })
 
